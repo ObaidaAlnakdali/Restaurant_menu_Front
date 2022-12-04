@@ -1,0 +1,80 @@
+/* Header */
+header {
+    background-image: url('../food.jpg');
+    position: relative;
+    height: 200px;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 3px solid #ff661d;
+}
+header::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #7e7e7e14;
+}
+header span {
+    color: white;
+    font-weight: bold;
+    font-size: 30px;
+    z-index: 1;
+    background: #ff661df5;
+    padding: 5px 20px;
+    border-radius: 40px 15px;
+    font-family: cursive;
+}
+@media (max-width: 450px) {
+    header {
+        height: 100px;;
+    }
+    header span {
+        font-size: 20px;
+    }
+}
+
+/* Card */
+.Dashboard_page .card {
+    box-shadow: rgb(0 0 0 / 24%) 0px 3px 8px;
+    margin: 20px 10px;
+    cursor: pointer;
+    border-radius: 30px;
+    position: relative;
+    padding: 20px;
+}
+.card-category {
+    width: 150px;
+}
+.card-category img{
+    width: 50px;
+    margin-bottom: 20px;
+}
+.card-item {
+    width: 200px;
+}
+.card-item img{
+    width: 150px;
+    height: 100px;
+    border-radius: 20px;
+}
+.item-active-span {
+    font-size: 14px;
+}
+.defaultImage {
+    width: 85px;
+    height: 80px;
+    border-radius: 20px;
+}
+.defaultImageItem {
+    width: 200px;
+    border-radius: 25px;
+}
+@media (max-width: 450px) {
+    .defaultImageItem {
+        width: 150px;
+    }
+}
