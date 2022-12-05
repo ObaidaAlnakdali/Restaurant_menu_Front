@@ -78,9 +78,12 @@ function AddDialog({ type, open, setOpen, ...props }) {
                         setDescription("")
                         setImageAdd(defaultImage)
                         setOpen(false)
+                        props.setAlert({type: "success", massage: "Add item is a success"})
+                        props.setOpenAlert(true)
                     })
                     .catch((error) => {
-                        console.log(error)
+                        props.setAlert({type: "error", massage: "Add item is a error"})
+                        props.setOpenAlert(true)
                     })
             }).catch(err => {
                 console.log(err)
@@ -102,12 +105,16 @@ function AddDialog({ type, open, setOpen, ...props }) {
                         setTitle("")
                         setImageAdd(defaultImage)
                         setOpen(false)
+                        props.setAlert({type: "success", massage: "Add item is a success"})
+                        props.setOpenAlert(true)
                     })
                     .catch((error) => {
-                        console.log(error)
+                        props.setAlert({type: "error", massage: "Add item is a error"})
+                        props.setOpenAlert(true)
                     })
             }).catch(err => {
-                console.log(err)
+                props.setAlert({type: "error", massage: "This is an error message!"})
+                props.setOpenAlert(true)
             })
     }
 

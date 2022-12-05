@@ -34,8 +34,9 @@ function Card({ type, ...props }) {
           const body = { image: res.data?.filename, icon: res.data?.filename }
           axios.put(`http://localhost:8000/api/${type}/${props.id}`, body)
             .then(res => {
-              console.log("update")
               setRender(!render)
+              props.setAlert({type: "success", massage: `Update ${type} is a success`})
+              props.setOpenAlert(true)
             })
             .catch((error) => {
               console.log(error)
@@ -64,9 +65,12 @@ function Card({ type, ...props }) {
            } else {
             setCategory((current) => current.filter((category) => category._id !== props.id));
            }
+           props.setAlert({type: "success", massage: `Delete ${type} is a success`})
+           props.setOpenAlert(true)
         })
         .catch((error) => {
-          console.log(error)
+          props.setAlert({type: "error", massage: "This is an error message!"})
+          props.setOpenAlert(true)
         })
   }
 
@@ -82,9 +86,12 @@ function Card({ type, ...props }) {
         .then(res => {
           console.log("update")
           setRender(!render)
+          props.setAlert({type: "success", massage: `Delete ${type} is a success`})
+          props.setOpenAlert(true)
         })
         .catch((error) => {
-          console.log(error)
+          props.setAlert({type: "error", massage: "This is an error message!"})
+          props.setOpenAlert(true)
         })
   }
 

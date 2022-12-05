@@ -3,7 +3,6 @@ import Header from "../components/Header";
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Card from "../components/Card";
 import { Context } from '../context/Context';
@@ -57,6 +56,15 @@ function Dashboard() {
   const [open, setOpen] = useState(false);
   const [type, setType] = useState("");
   const [value, setValue] = useState(0);
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alert, setAlert] = useState({type: "success", message: ""});
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpenAlert(false);
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -94,6 +102,8 @@ function Dashboard() {
                   title={category.title}
                   image={category.icon}
                   id={category._id}
+                  setOpenAlert={setOpenAlert}
+                  setAlert={setAlert}
                 />
               )
             })
@@ -133,6 +143,8 @@ function Dashboard() {
                   active={item.active}
                   id={item._id}
                   category={item.category}
+                  setOpenAlert={setOpenAlert}
+                  setAlert={setAlert}
                 />
               )
             })
@@ -164,7 +176,16 @@ function Dashboard() {
         open={open} 
         setOpen={setOpen} 
         type={type}
+        setOpenAlert={setOpenAlert}
+        setAlert={setAlert}
       />
+
+      <Snackbar open={openAlert} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={alert.type} sx={{ width: '100%' }}>
+          This is a success message!
+          {alert.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
