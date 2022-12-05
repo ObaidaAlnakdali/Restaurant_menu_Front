@@ -3,7 +3,6 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -17,22 +16,28 @@ import './style.css';
 
 import { Context } from '../context/Context';
 
-
 function AddDialog({ type, open, setOpen, ...props }) {
-    const {category, setCategory, setItems, items } = useContext(Context)
+    const {category, setCategory, setItems, setRender, render } = useContext(Context)
     const [title, setTitle] = useState("")
     const [price, setPrice] = useState("")
     const [description, setDescription] = useState("")
-    const [categoryID, setCategoryID] = useState("")
     const [active, setActive] = useState(true)
     const [categorySelect, setCategorySelect] = useState(1)
+    const [categorySelectName, setCategorySelectName] = useState("")
     const [file, setFile] = useState()
     const [imageAdd, setImageAdd] = useState(defaultImage)
 
     const handleClose = () => {
         setOpen(false);
+        setTitle("")
+        setPrice("")
+        setDescription("")
+        setImageAdd(defaultImage)
+        setRender(!render)
     };
-
+    const addName = (event) => {
+        setCategorySelectName(event.target.innerText)
+    };
     const handleChange = (event) => {
         setCategorySelect(event.target.value);
       };
@@ -43,55 +48,68 @@ function AddDialog({ type, open, setOpen, ...props }) {
 
     const handelChangeImage = (e) => {
         e.preventDefault();
+        setImageAdd(URL.createObjectURL(e.target.files[0]));
+        setFile(e.target.files[0])
+    }
+
+    const addItem = () => {
         var formData = new FormData();
-        formData.append("uploaded_file", e.target.files[0]);
+        formData.append("uploaded_file", file);
+        formData.append("name", "");
         axios.post(`http://localhost:8000/api/UploadImage`, formData)
             .then(res => {
                 setFile(res.data?.filename)
-                setImageAdd(URL.createObjectURL(e.target.files[0]));
+                const body = { 
+                    title: title, 
+                    price: price, 
+                    description: description, 
+                    active: active, 
+                    image: res.data?.filename,
+                    category: categorySelect,
+                } 
+                console.log("body", body)
+                axios.post(`http://localhost:8000/api/item`, body)
+                    .then(res => {
+                        body['_id'] = res.data.response._id
+                        body['category'] = {_id:categorySelect, title:categorySelectName}
+                        setItems(current => [...current, body]);
+                        setTitle("")
+                        setPrice("")
+                        setDescription("")
+                        setImageAdd(defaultImage)
+                        setOpen(false)
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             }).catch(err => {
                 console.log(err)
             })
     }
 
-    const addItem = () => {
-        const body = { 
-            title: title, 
-            price: price, 
-            description: description, 
-            active: active, 
-            category: categorySelect,
-            image: file,
-        } 
-        console.log("body", body)
-        axios.post(`http://localhost:8000/api/item`, body)
-            .then(res => {
-                body['_id'] = res.data.response._id
-                setItems(current => [...current, body]);
-                setTitle("")
-                setImageAdd(defaultImage)
-                setOpen(false)
-            })
-            .catch((error) => {
-                console.log(error)
-            })
-    }
-
     const addCategory = () => {
-            const body = { title: title, icon: file }
-            axios.post(`http://localhost:8000/api/category`, body)
-                .then(res => {
-                    body['_id'] = res.data.response._id
-                    setCategory(current => [...current, body]);
-                    setTitle("")
-                    setImageAdd(defaultImage)
-                    setOpen(false)
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+        var formData = new FormData();
+        formData.append("uploaded_file", file);
+        formData.append("name", "");
+        axios.post(`http://localhost:8000/api/UploadImage`, formData)
+            .then(res => {
+                setFile(res.data?.filename)
+                const body = { title: title, icon: res.data?.filename }
+                axios.post(`http://localhost:8000/api/category`, body)
+                    .then(res => {
+                        body['_id'] = res.data.response._id
+                        setCategory(current => [...current, body]);
+                        setTitle("")
+                        setImageAdd(defaultImage)
+                        setOpen(false)
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            }).catch(err => {
+                console.log(err)
+            })
     }
-
 
     return (
         <Dialog
@@ -157,9 +175,7 @@ function AddDialog({ type, open, setOpen, ...props }) {
                                     onChange={(e) => setTitle(e.target.value)}
                                 />
                             </Box>
-                        )
-                        :
-                        (
+                        ) : (
                             <Box sx={{ display: "flex", flexDirection: "column" }}>
                                 <Box
                                     sx={{
@@ -253,22 +269,16 @@ function AddDialog({ type, open, setOpen, ...props }) {
                                         '& fieldset': { top: 0 }
                                     }}
                                 >
-                                    <MenuItem
-                                            value={1}
-                                        >
+                                    <MenuItem value={1}>
                                             Choose Category
                                         </MenuItem>
                                     {category.map((option) => (
-                                        <MenuItem
-                                            key={option._id}
-                                            value={option._id}
-                                        >
+                                        <MenuItem key={option._id} value={option._id} name={option.title} onClick={addName}>
                                             {option.title}
                                         </MenuItem>
                                     ))}
                                 </TextField>
                                 <TextField
-                                    //label="Title"
                                     variant="outlined"
                                     size="small"
                                     color="warning"
@@ -308,11 +318,9 @@ function AddDialog({ type, open, setOpen, ...props }) {
                             </Box>
                         )
                 }
-
             </DialogContent>
             <DialogActions>
-                {
-                    type === "item" ?
+                { type === "item" ? (
                         <Button
                             variant="contained"
                             color="warning"
@@ -326,8 +334,8 @@ function AddDialog({ type, open, setOpen, ...props }) {
                             onClick={() => addItem()}
                         >
                             Add
-                        </Button>
-                        :
+                        </Button> 
+                        ) : (
                         <Button
                             variant="contained"
                             color="warning"
@@ -341,9 +349,9 @@ function AddDialog({ type, open, setOpen, ...props }) {
                             onClick={() => addCategory()}
                         >
                             Add
-                        </Button>
-                }
-                
+                        </Button> 
+                        )
+                } 
                 <Button
                     variant="contained"
                     color="warning"

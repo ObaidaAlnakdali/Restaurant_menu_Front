@@ -13,20 +13,21 @@ import './style.css';
 import { Context } from '../context/Context';
 
 function Card({ type, ...props }) {
-  const { category, setCategory, setItems } = useContext(Context)
-  const [title, setTitle] = useState(props.title)
+  const { category, setCategory, setItems, render, setRender } = useContext(Context)
+  const [title, setTitle] = useState(props?.title)
   const [price, setPrice] = useState(props?.price)
   const [description, setDescription] = useState(props?.description)
-  const [image, setImage] = useState(`http://localhost:8000/images/${props.image}`)
+  const [image, setImage] = useState(`http://localhost:8000/images/${props?.image}`)
   const [active, setActive] = useState(props?.active)
   const [categorySelect, setCategorySelect] = useState(props?.category?._id)
-  const [file, setFile] = useState("")
+  const [file, setFile] = useState(props?.image)
 
   const handelChangeImage = (e) => {
     e.preventDefault();
     var formData = new FormData();
     formData.append("uploaded_file", e.target.files[0]);
-    axios.post(`http://localhost:8000/api/UploadImage`, formData)
+    formData.append("name", file);
+    axios.post(`http://localhost:8000/api/UploadImage`, formData )
       .then(res => {
         setImage(URL.createObjectURL(e.target.files[0]));
         setFile(res.data?.filename);
@@ -34,6 +35,7 @@ function Card({ type, ...props }) {
           axios.put(`http://localhost:8000/api/${type}/${props.id}`, body)
             .then(res => {
               console.log("update")
+              setRender(!render)
             })
             .catch((error) => {
               console.log(error)
@@ -53,7 +55,9 @@ function Card({ type, ...props }) {
   };
 
   const deleteCard = () => {
-      axios.delete(`http://localhost:8000/api/${type}/${props.id}`)
+      var formData = new FormData(); 
+      formData.append("name", file);
+      axios.delete(`http://localhost:8000/api/${type}/${props.id}`, formData)
         .then(res => {
           if (type === "item") {
             setItems((current) => current.filter((item) => item._id !== props.id));
@@ -67,7 +71,6 @@ function Card({ type, ...props }) {
   }
 
   const updateCard = () => {
-    if (type === "item") {
       const body = {
         title: title,
         description: description,
@@ -75,23 +78,14 @@ function Card({ type, ...props }) {
         category: categorySelect,
         active: active
       }
-      axios.put(`http://localhost:8000/api/item/${props.id}`, body)
+      axios.put(`http://localhost:8000/api/${type}/${props.id}`, body)
         .then(res => {
           console.log("update")
+          setRender(!render)
         })
         .catch((error) => {
           console.log(error)
         })
-    } else {
-      const body = { title: title }
-      axios.put(`http://localhost:8000/api/category/${props.id}`, body)
-        .then(res => {
-          console.log("update")
-        })
-        .catch((error) => {
-          console.log(error)
-        })
-    }
   }
 
   return (
